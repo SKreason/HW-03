@@ -1,0 +1,68 @@
+from NewsPortal.models import *                             ## импорт моделей
+
+us1 = User.objects.create_user(username='User_first')       ## создание пользователя "User_first"
+us2 = User.objects.create_user(username='User_second')      ## создание пользователя "User_second"
+
+Author.objects.create(author_user=us1)                      ## создание первого автора
+Author.objects.create(author_user=us2)                      ## создание второго автора
+
+Category.objects.create(name='IT')                          ## создание категории "IT"
+Category.objects.create(name='Development')                 ## создание категории "Development"
+Category.objects.create(name='Mobile')                      ## создание категории "Mobile"
+Category.objects.create(name='Django')                      ## создание категории "Django"
+
+a1 = Author.objects.get(id=1)                               ## присваивание к переменной автора 1
+a2 = Author.objects.get(id=2)                               ## присваивание к переменной автора 2
+
+Post.objects.create(author=a1, categoryType='AR', title='статья 1', text='текст статьи 1')      ## создание статьи 1
+Post.objects.create(author=a2, categoryType='AR', title='статья 2', text='текст статьи 2')      ## создание статьи 2
+Post.objects.create(author=a1, categoryType='NW', title='новость 1', text='текст новости 1')    ## создание новости 1
+
+Post.objects.get(id=1).postCategory.add(Category.objects.get(id=1))     ## присвоение категории "IT" к статье 1
+Post.objects.get(id=1).postCategory.add(Category.objects.get(id=3))     ## присвоение категории "Mobile" к статье 1
+Post.objects.get(id=2).postCategory.add(Category.objects.get(id=2))     ## присвоение категории "Development" к статье 2
+Post.objects.get(id=2).postCategory.add(Category.objects.get(id=4))     ## присвоение категории "Django" к статье 2
+Post.objects.get(id=3).postCategory.add(Category.objects.get(id=2))     ## присвоение категории "Development" к новости 1
+Post.objects.get(id=3).postCategory.add(Category.objects.get(id=3))     ## присвоение категории "Mobile" к новости 1
+
+p1 = Post.objects.get(id=1)                                ## присваивание к переменной статьи 1
+p2 = Post.objects.get(id=2)                                ## присваивание к переменной статьи 2
+p3 = Post.objects.get(id=3)                                ## присваивание к переменной новости 1
+
+Comment.objects.create(commentPost=p1, commentUser=a1.author_user, text='интересная статья!')       ## создание комментария
+Comment.objects.create(commentPost=p2, commentUser=a2.author_user, text='увлекательная статья!')    ## создание комментария
+Comment.objects.create(commentPost=p3, commentUser=a2.author_user, text='отлично!')                 ## создание комментария
+Comment.objects.create(commentPost=p3, commentUser=a1.author_user, text='давно ждал!')              ## создание комментария
+
+## корректировка рейтингов
+p1.like()
+p1.like()
+p2.like()
+p2.like()
+p3.dislike()
+Comment.objects.get(id=1).like()
+Comment.objects.get(id=1).like()
+Comment.objects.get(id=2).dislike()
+Comment.objects.get(id=2).dislike()
+Comment.objects.get(id=3).like()
+Comment.objects.get(id=3).like()
+Comment.objects.get(id=4).dislike()
+Comment.objects.get(id=4).dislike()
+Comment.objects.get(id=4).dislike()
+
+a1.update_rating()              ##обновление рейтинга автора 1
+a2.update_rating()              ##обновление рейтинга автора 2
+
+Author.objects.order_by('-ratingAuthor')[0].author_user.username                ## имя лучшего автора при сортировке
+
+b_AR = Post.objects.filter(categoryType='AR').order_by('-rating').first()         ## присвоение переменной лучшей статьи с фильтром и сортировкой
+b_AR.dateCreation                                                                 ## вывод даты создания
+b_AR.author.author_user.username                                                  ## вывод имя автора
+b_AR.rating                                                                       ## вывод рейтинга
+b_AR.title                                                                        ## вывод заголовка
+b_AR.preview()                                                                    ## вывод превью
+
+## 11 вывод данных по запросу
+comments = Comment.objects.filter(commentPost=Post.objects.filter(categoryType='AR').order_by('-rating').first())
+for i in comments:
+    print(i.dateCreation, i.commentUser.username, i.rating, i.text)

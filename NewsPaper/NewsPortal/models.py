@@ -14,7 +14,7 @@ class Author(models.Model):
 
         commentRat = self.author_user.comment_set.aggregate(commentRating=Sum('rating'))
         cRat = 0
-        cRat += commentRat.gey('commentRating')
+        cRat += commentRat.get('commentRating')
 
         self.ratingAuthor = pRating * 3 + cRat
         self.save()
